@@ -25,12 +25,16 @@ import json
 import time
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
+from datetime import datetime
 
 class Parse_magnit:
+
+
     def __init__(self, start_url):
         self.start_url = start_url
         mongo_client = MongoClient()
         self.db  = mongo_client['hw_2']
+        self.month = [ 'января' , 'февраля' , 'марта' , 'апреля' , 'мая' , 'июня' , 'июля' , 'августа' , 'сентября' , 'октября' , 'ноября' , 'декабря' ]
 
     def parse(self):
         products_dict   = {}
@@ -89,17 +93,26 @@ class Parse_magnit:
                 products_dict[i]['image_url'] = None
 
             try:
-                products_dict[i]['date_from']  = promos[i].find(attrs={'class':'card-sale__date'}).findAll('p')[0].text
+                products_dict[i]['date_from']  = (promos[i].find(attrs={'class':'card-sale__date'}).findAll('p')[0].text)
+                products_dict[i]['date_from'] = products_dict[i]['date_from'].split(' ')[1:]
+                products_dict[i]['date_from'][1] = str(int(self.month.index(products_dict[0]['date_from'][1])) + 1)
+                products_dict[i]['date_from'] = '-'.join(products_dict[i]['date_from'])
+                products_dict[i]['date_from'] = datetime.strptime(products_dict[i]['date_from'], '%d-%m')
+
             except:
                 products_dict[i]['date_from'] = None
 
             try:
                 products_dict[i]['date_to'] = promos[i].find(attrs={'class': 'card-sale__date'}).findAll('p')[
                         1].text
+                products_dict[i]['date_to'] = products_dict[i]['date_to'].split(' ')[1:]
+                products_dict[i]['date_to'][1] = str(int(self.month.index(products_dict[0]['date_to'][1])) + 1)
+                products_dict[i]['date_to'] = '-'.join(products_dict[i]['date_to'])
+                products_dict[i]['date_to'] = datetime.strptime(products_dict[i]['date_to'], '%d-%m')
             except:
                 products_dict[i]['date_to'] = None
 
-        self.save_to(products_dict)
+        # self.save_to(products_dict)
         print(1)
 
     def save_to(self, product_data: dict):
