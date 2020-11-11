@@ -101,7 +101,7 @@ class InstagramFriendListSpiderSpider(scrapy.Spider):
                     'first': 100,
                     'after': end_cursor,
                 }
-                url = f"{self.api_url}?query_hash={self.query_hash['followers']}&variables={json.dumps(variables)}"
+                url = f"{self.api_url}?query_hash={self.query_hash['following']}&variables={json.dumps(variables)}"
                 yield response.follow(url, callback=self.target_following_parse, cb_kwargs={"user_info": user_info})
 
             else:
